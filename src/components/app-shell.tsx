@@ -1,3 +1,9 @@
+  // Ensure selectedChat always syncs with aiConversation for instant Gemini responses
+  useEffect(() => {
+    if (selectedChat?.id === AI_USER_ID) {
+      setSelectedChat({ ...aiConversation });
+    }
+  }, [aiConversation]);
 
 'use client';
 import {
