@@ -131,17 +131,16 @@ const ChatViewComponent = ({
     const newMessagesAdded = messages.length > prevMessagesLength.current;
 
     if (newMessagesAdded && messages.length > 0) {
-        const lastMessage = messages[messages.length-1];
-        // If last message is from current user, scroll to bottom
-        if (lastMessage.senderId === currentUser?.uid) {
-            scrollToBottom();
-        } else if (!isAtBottom) {
-            setNewMessagesCount(prev => prev + (messages.length - prevMessagesLength.current));
-        } else {
-            scrollToBottom();
-        }
+      const lastMessage = messages[messages.length-1];
+      // Always scroll to bottom if last message is from AI or current user
+      if (lastMessage.senderId === currentUser?.uid || lastMessage.senderId === 'gemini-ai-chat-bot-7a4b9c1d-f2e3-4d56-a1b2-c3d4e5f6a7b8') {
+        scrollToBottom();
+      } else if (!isAtBottom) {
+        setNewMessagesCount(prev => prev + (messages.length - prevMessagesLength.current));
+      } else {
+        scrollToBottom();
+      }
     }
-    
     prevMessagesLength.current = messages.length;
   }, [messages, isAtBottom, currentUser?.uid, chat, currentUser]);
   
