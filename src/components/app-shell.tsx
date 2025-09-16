@@ -1,14 +1,5 @@
-"use client";
-// ...existing code...
 
-// ...existing code...
-
-  // Ensure selectedChat always syncs with aiConversation for instant Gemini responses
-  useEffect(() => {
-    if (selectedChat?.id === AI_USER_ID) {
-      setSelectedChat({ ...aiConversation });
-    }
-  }, [aiConversation]);
+'use client';
 import {
   addDoc, arrayRemove, arrayUnion, collection, deleteDoc, doc, getDoc, getDocs, onSnapshot, orderBy, query,
   runTransaction, serverTimestamp, Timestamp, updateDoc, where, writeBatch, limit, startAfter, setDoc
@@ -109,7 +100,6 @@ function useChatData() {
     }
   };
 
-
   const [aiConversation, setAiConversation] = useState<Conversation>(initialAiConversation);
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [selectedChat, setSelectedChat] = useState<Conversation | undefined>(undefined);
@@ -122,6 +112,8 @@ function useChatData() {
   const uploadTasks = useRef<Map<string, UploadTask>>(new Map());
   const xhrRequests = useRef<Map<string, { xhrAbort?: () => void }>>(new Map());
 
+
+  
   const [currentUser, setCurrentUser] = useState<User | undefined>(undefined);
   const [stories, setStories] = useState<Story[]>([]);
   const [viewingStory, setViewingStory] = useState<{ user: User, stories: Story[] } | null>(null);
@@ -131,15 +123,8 @@ function useChatData() {
   const [firstMessageDoc, setFirstMessageDoc] = useState<any>(null);
   const [hasMoreMessages, setHasMoreMessages] = useState(true);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
-
+  
   const messagesUnsubscribe = useRef<() => void>();
-
-  // Ensure selectedChat always syncs with aiConversation for instant Gemini responses
-  useEffect(() => {
-    if (selectedChat?.id === AI_USER_ID) {
-      setSelectedChat({ ...aiConversation });
-    }
-  }, [aiConversation]);
 
 
   useNotifications({ conversations, usersCache, currentUser, activeChatId: selectedChat?.id });
@@ -170,7 +155,7 @@ function useChatData() {
               setAppBackground(userData.background);
             }
             if(userData.hasOwnProperty('useCustomBackground')) {
-              setUseCustomBackground(Boolean(userData.useCustomBackground));
+              setUseCustomBackground(userData.useCustomBackground ?? false);
             }
         }
     });
@@ -1323,7 +1308,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           <ImagePreviewDialog
             file={chatData.previewStoryFile}
             mode="story"
-            onSend={async (file: File, message: string) => {
+            onSend={async (file, message) => {
               await chatData.handleCreateStoryFromFile(file, message);
             }}
             onCancel={() => chatData.setPreviewStoryFile(null)}

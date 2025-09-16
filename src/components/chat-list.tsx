@@ -177,9 +177,9 @@ export function ChatList() {
 
   const usersForNewChat = allUsers.filter(u => u.uid !== currentUser?.uid && !(currentUser?.blockedUsers || []).includes(u.uid));
 
-  const shouldShowAiChat = useMemo(() => {
-    return aiConversation.name.toLowerCase().includes(searchTerm.toLowerCase());
-  }, [aiConversation, searchTerm]);
+    const shouldShowAiChat = useMemo(() => {
+        return aiConversation?.name?.toLowerCase().includes(searchTerm.toLowerCase());
+    }, [aiConversation, searchTerm]);
 
   return (
     <>
