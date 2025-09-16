@@ -453,7 +453,7 @@ function ChatItem({ conversation, isSelected, currentUser, onSelect, onAction, o
             </div>
             <div className="flex justify-between items-start gap-2">
                 <p className="text-sm text-muted-foreground truncate flex-grow">
-                    {text}
+                    {text.length > 40 ? text.slice(0, 40) + '...' : text}
                 </p>
                 {conversation.unreadCount && conversation.unreadCount > 0 ? (
                     <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary text-xs text-primary-foreground shrink-0">
