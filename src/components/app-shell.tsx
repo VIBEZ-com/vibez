@@ -566,10 +566,14 @@ function useChatData() {
 
     } catch (error) {
       console.error("Error with AI conversation:", error);
+      let errorText = "Sorry, I encountered an error. Please try again.";
+      if (error && typeof error === 'object' && 'message' in error && typeof error.message === 'string') {
+        errorText = error.message;
+      }
       const errorMessage: Message = {
         id: uuidv4(),
         senderId: AI_USER_ID,
-        text: "Sorry, I encountered an error. Please try again.",
+        text: errorText,
         timestamp: new Date(),
         status: 'read',
       };
