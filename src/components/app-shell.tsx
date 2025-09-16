@@ -572,25 +572,30 @@ function useChatData() {
           lastMessage: { text: aiResponse.reply, senderId: AI_USER_ID, timestamp: new Date() as any }
         };
         setSelectedChat({ ...finalAiConvo });
-        setMessages(finalAiConvo.messages); // Instantly update message list
         return finalAiConvo;
       });
 
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error with AI conversation:", error);
-       const errorMessage: Message = {
-          id: uuidv4(),
-          senderId: AI_USER_ID,
-          text: "Sorry, I encountered an error. Please try again.",
-          timestamp: new Date(),
-          status: 'read',
-        };
-       setAiConversation(prev => {
-          const finalAiConvo = { ...prev, messages: [...prev.messages, errorMessage] };
-          setSelectedChat(finalAiConvo);
-          setMessages(finalAiConvo.messages); // Instantly update message list
-          return finalAiConvo;
-        });
+      // Try to use error message from AI flow if available
+      let errorText = "Sorry, I encountered an error. Please try again.";
+      if (error && error.reply) {
+        errorText = error.reply;
+      } else if (error && error.message) {
+        errorText = error.message;
+      }
+      const errorMessage: Message = {
+        id: uuidv4(),
+        senderId: AI_USER_ID,
+        text: errorText,
+        timestamp: new Date(),
+        status: 'read',
+      };
+      setAiConversation(prev => {
+        const finalAiConvo = { ...prev, messages: [...prev.messages, errorMessage] };
+        setSelectedChat(finalAiConvo);
+        return finalAiConvo;
+      });
     } finally {
       setIsAiReplying(false);
     }
