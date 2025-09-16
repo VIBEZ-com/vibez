@@ -73,7 +73,23 @@ export async function uploadToCloudinaryXHR(
 
 
 function useChatData() {
-  const { user: authUser, loading: authLoading } = useAuth();
+  // ...existing state declarations...
+
+  // Automatically refresh AI chat messages every 2 seconds when Gemini chat is open
+  useEffect(() => {
+    if (selectedChat?.id !== AI_USER_ID) return;
+    const interval = setInterval(() => {
+      setMessages(aiConversation.messages || []);
+    }, 2000);
+    return () => clearInterval(interval);
+  }, [selectedChat?.id, aiConversation.messages]);
+  // ...existing state declarations...
+
+  // ...existing state declarations...
+
+  // ...existing state and custom hook declarations...
+
+  // Automatically refresh AI chat messages every 2 seconds when Gemini chat is open
   const { toast } = useToast();
   const { setAppBackground, setUseCustomBackground } = useAppearance();
 
@@ -125,6 +141,15 @@ function useChatData() {
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   
   const messagesUnsubscribe = useRef<() => void>();
+
+  // Automatically refresh AI chat messages every 2 seconds when Gemini chat is open
+  useEffect(() => {
+    if (selectedChat?.id !== AI_USER_ID) return;
+    const interval = setInterval(() => {
+      setMessages(aiConversation.messages || []);
+    }, 2000);
+    return () => clearInterval(interval);
+  }, [selectedChat?.id, aiConversation.messages]);
 
 
   useNotifications({ conversations, usersCache, currentUser, activeChatId: selectedChat?.id });
