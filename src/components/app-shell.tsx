@@ -1,12 +1,14 @@
 "use client";
 // ...existing code...
 
-// Ensure selectedChat always syncs with aiConversation for instant Gemini responses
-useEffect(() => {
-  if (selectedChat?.id === AI_USER_ID) {
-    setSelectedChat({ ...aiConversation });
-  }
-}, [aiConversation]);
+// ...existing code...
+
+  // Ensure selectedChat always syncs with aiConversation for instant Gemini responses
+  useEffect(() => {
+    if (selectedChat?.id === AI_USER_ID) {
+      setSelectedChat({ ...aiConversation });
+    }
+  }, [aiConversation]);
 import {
   addDoc, arrayRemove, arrayUnion, collection, deleteDoc, doc, getDoc, getDocs, onSnapshot, orderBy, query,
   runTransaction, serverTimestamp, Timestamp, updateDoc, where, writeBatch, limit, startAfter, setDoc
@@ -571,31 +573,25 @@ function useChatData() {
           messages: newMessages,
           lastMessage: { text: aiResponse.reply, senderId: AI_USER_ID, timestamp: new Date() as any }
         };
+        // Force update selectedChat to always use the latest aiConversation object
         setSelectedChat({ ...finalAiConvo });
         return finalAiConvo;
       });
 
-    } catch (error: any) {
+    } catch (error) {
       console.error("Error with AI conversation:", error);
-      // Try to use error message from AI flow if available
-      let errorText = "Sorry, I encountered an error. Please try again.";
-      if (error && error.reply) {
-        errorText = error.reply;
-      } else if (error && error.message) {
-        errorText = error.message;
-      }
-      const errorMessage: Message = {
-        id: uuidv4(),
-        senderId: AI_USER_ID,
-        text: errorText,
-        timestamp: new Date(),
-        status: 'read',
-      };
-      setAiConversation(prev => {
-        const finalAiConvo = { ...prev, messages: [...prev.messages, errorMessage] };
-        setSelectedChat(finalAiConvo);
-        return finalAiConvo;
-      });
+       const errorMessage: Message = {
+          id: uuidv4(),
+          senderId: AI_USER_ID,
+          text: "Sorry, I encountered an error. Please try again.",
+          timestamp: new Date(),
+          status: 'read',
+        };
+       setAiConversation(prev => {
+          const finalAiConvo = { ...prev, messages: [...prev.messages, errorMessage] };
+          setSelectedChat(finalAiConvo);
+          return finalAiConvo;
+        });
     } finally {
       setIsAiReplying(false);
     }
