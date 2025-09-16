@@ -571,8 +571,8 @@ function useChatData() {
           messages: newMessages,
           lastMessage: { text: aiResponse.reply, senderId: AI_USER_ID, timestamp: new Date() as any }
         };
-        // Force update selectedChat to always use the latest aiConversation object
         setSelectedChat({ ...finalAiConvo });
+        setMessages(finalAiConvo.messages); // Instantly update message list
         return finalAiConvo;
       });
 
@@ -588,6 +588,7 @@ function useChatData() {
        setAiConversation(prev => {
           const finalAiConvo = { ...prev, messages: [...prev.messages, errorMessage] };
           setSelectedChat(finalAiConvo);
+          setMessages(finalAiConvo.messages); // Instantly update message list
           return finalAiConvo;
         });
     } finally {
