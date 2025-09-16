@@ -1,13 +1,12 @@
-  // ...existing code...
-
-  // Ensure selectedChat always syncs with aiConversation for instant Gemini responses
-  useEffect(() => {
-    if (selectedChat?.id === AI_USER_ID) {
-      setSelectedChat({ ...aiConversation });
-    }
-  }, [aiConversation]);
-
 "use client";
+// ...existing code...
+
+// Ensure selectedChat always syncs with aiConversation for instant Gemini responses
+useEffect(() => {
+  if (selectedChat?.id === AI_USER_ID) {
+    setSelectedChat({ ...aiConversation });
+  }
+}, [aiConversation]);
 import {
   addDoc, arrayRemove, arrayUnion, collection, deleteDoc, doc, getDoc, getDocs, onSnapshot, orderBy, query,
   runTransaction, serverTimestamp, Timestamp, updateDoc, where, writeBatch, limit, startAfter, setDoc
