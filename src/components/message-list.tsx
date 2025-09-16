@@ -185,16 +185,20 @@ export const MessageList = forwardRef<HTMLDivElement, MessageListProps>(({
                                         <span className="relative bg-background px-2 text-xs text-muted-foreground">{dateSeparator}</span>
                                     </div>
                                 )}
-                                <MemoizedMessageBubble
-                                    message={message}
-                                    sender={sender}
-                                    isCurrentUser={sender?.uid === currentUser.uid}
-                                    progress={uploadProgress.get(message.clientTempId || message.id)}
-                                    onCancelUpload={() => onCancelUpload(message.clientTempId || message.id)}
-                                    onMessageAction={onMessageAction}
-                                    onReply={onReply}
-                                    isRead={isRead}
-                                />
+                                                                {message && sender ? (
+                                                                    <MemoizedMessageBubble
+                                                                        message={message}
+                                                                        sender={sender}
+                                                                        isCurrentUser={sender?.uid === currentUser.uid}
+                                                                        progress={uploadProgress.get(message.clientTempId || message.id)}
+                                                                        onCancelUpload={() => onCancelUpload(message.clientTempId || message.id)}
+                                                                        onMessageAction={onMessageAction}
+                                                                        onReply={onReply}
+                                                                        isRead={isRead}
+                                                                    />
+                                                                ) : (
+                                                                    <div className="text-muted-foreground text-xs px-2 py-1">Invalid message data.</div>
+                                                                )}
                             </Fragment>
                         );
                     })
