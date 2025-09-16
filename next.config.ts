@@ -32,6 +32,12 @@ const nextConfig: NextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
+  optimizeFonts: true,
+  compress: true,
+  experimental: {
+    optimizeCss: true,
+    optimizePackageImports: ['@mui/icons-material', '@mui/material', 'lucide-react'],
+  },
   images: {
     remotePatterns: [
       {
