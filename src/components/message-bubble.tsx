@@ -235,12 +235,13 @@ function MessageBubble({ message, sender, isCurrentUser, progress, onCancelUploa
       <UserAvatar user={sender} className="h-8 w-8" />
       <div
         className={cn(
-          'relative flex max-w-[70%] flex-col rounded-xl shadow-md',
+          'relative flex max-w-[70%] flex-col rounded-xl shadow-md break-words',
           isCurrentUser
             ? 'rounded-tr-none bg-gradient-to-br from-gradient-from to-gradient-to text-primary-foreground animated-gradient'
             : 'rounded-tl-none bg-card',
-            (message.file && !message.text) ? 'p-1.5' : 'px-4 py-2'
+          (message.file && !message.text) ? 'p-1.5' : 'px-4 py-2'
         )}
+        style={{ wordBreak: 'break-word', overflowWrap: 'anywhere', maxWidth: '70vw' }}
       >
         {!isCurrentUser && (
             <p className="text-sm font-semibold text-primary px-2 pt-1 font-heading">{sender.name}</p>
