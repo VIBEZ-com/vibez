@@ -7,7 +7,7 @@
     }
   }, [aiConversation]);
 
-'use client';
+"use client";
 import {
   addDoc, arrayRemove, arrayUnion, collection, deleteDoc, doc, getDoc, getDocs, onSnapshot, orderBy, query,
   runTransaction, serverTimestamp, Timestamp, updateDoc, where, writeBatch, limit, startAfter, setDoc
