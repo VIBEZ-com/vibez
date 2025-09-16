@@ -24,10 +24,6 @@ const AiChatOutputSchema = z.object({
 });
 export type AiChatOutput = z.infer<typeof AiChatOutputSchema>;
 
-export async function continueConversation(input: AiChatInput): Promise<AiChatOutput> {
-  return continueConversationFlow(input);
-}
-
 const prompt = ai.definePrompt({
   name: 'aiChatPrompt',
   input: {schema: AiChatInputSchema},
@@ -67,3 +63,8 @@ const continueConversationFlow = ai.defineFlow(
     }
   }
 );
+
+export async function continueConversation(input: AiChatInput): Promise<AiChatOutput> {
+  return await continueConversationFlow(input);
+}
+
