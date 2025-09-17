@@ -73,23 +73,7 @@ export async function uploadToCloudinaryXHR(
 
 
 function useChatData() {
-  // ...existing state declarations...
-
-  // Automatically refresh AI chat messages every 2 seconds when Gemini chat is open
-  useEffect(() => {
-    if (selectedChat?.id !== AI_USER_ID) return;
-    const interval = setInterval(() => {
-      setMessages(aiConversation.messages || []);
-    }, 2000);
-    return () => clearInterval(interval);
-  }, [selectedChat?.id, aiConversation.messages]);
-  // ...existing state declarations...
-
-  // ...existing state declarations...
-
-  // ...existing state and custom hook declarations...
-
-  // Automatically refresh AI chat messages every 2 seconds when Gemini chat is open
+  const { user: authUser, loading: authLoading } = useAuth();
   const { toast } = useToast();
   const { setAppBackground, setUseCustomBackground } = useAppearance();
 
@@ -142,15 +126,6 @@ function useChatData() {
   
   const messagesUnsubscribe = useRef<() => void>();
 
-  // Automatically refresh AI chat messages every 2 seconds when Gemini chat is open
-  useEffect(() => {
-    if (selectedChat?.id !== AI_USER_ID) return;
-    const interval = setInterval(() => {
-      setMessages(aiConversation.messages || []);
-    }, 2000);
-    return () => clearInterval(interval);
-  }, [selectedChat?.id, aiConversation.messages]);
-
 
   useNotifications({ conversations, usersCache, currentUser, activeChatId: selectedChat?.id });
 
@@ -180,7 +155,7 @@ function useChatData() {
               setAppBackground(userData.background);
             }
             if(userData.hasOwnProperty('useCustomBackground')) {
-              setUseCustomBackground(userData.useCustomBackground ?? false);
+              setUseCustomBackground(userData.useCustomBackground);
             }
         }
     });
@@ -549,22 +524,23 @@ function useChatData() {
       timestamp: new Date(),
       status: 'read',
     };
+    
     // Optimistically update AI chat
-    const tempAiConvo = {
-      ...aiConversation,
-      messages: [...(aiConversation.messages || []), userMessage],
-      lastMessage: { text: messageText, senderId: currentUser.uid, timestamp: new Date() as any }
-    };
-    setAiConversation(tempAiConvo);
-    setSelectedChat(tempAiConvo);
-    setMessages(tempAiConvo.messages || []);
-
+    setAiConversation(prev => ({
+        ...prev,
+        messages: [...(prev.messages || []), userMessage],
+        lastMessage: { text: messageText, senderId: currentUser.uid, timestamp: new Date() as any }
+    }));
+    setMessages(prev => [...prev, userMessage]);
+    
     setIsAiReplying(true);
 
     try {
-      const history = (tempAiConvo.messages)
-        .slice(-10)
-        .map(m => (m.senderId === currentUser.uid ? { user: m.text } : { model: m.text }));
+      const history = (aiConversation.messages || [])
+          .concat(userMessage) // include the latest message
+          .slice(-10) 
+          .filter(m => !!m.text) // Ensure only text messages are included
+          .map(m => (m.senderId === currentUser.uid ? { user: m.text } : { model: m.text }));
 
       const aiResponse = await continueConversation({ message: messageText, history });
 
@@ -575,43 +551,44 @@ function useChatData() {
         timestamp: new Date(),
         status: 'read',
       };
-
+      
       setAiConversation(prev => {
-        const newMessages = [...prev.messages, aiMessage];
-        const finalAiConvo = {
-          ...prev,
-          messages: newMessages,
-          lastMessage: { text: aiResponse.reply, senderId: AI_USER_ID, timestamp: new Date() as any }
-        };
-        // Force update selectedChat to always use the latest aiConversation object
-        setSelectedChat({ ...finalAiConvo });
-        setMessages(finalAiConvo.messages || []);
-        return finalAiConvo;
+          const newMessages = [...(prev.messages || []), aiMessage];
+          const finalAiConvo = {
+            ...prev,
+            messages: newMessages,
+            lastMessage: { text: aiResponse.reply, senderId: AI_USER_ID, timestamp: new Date() as any }
+          };
+          // If the AI chat is still selected, update the main messages state and selected chat
+          if (selectedChat?.id === AI_USER_ID) {
+              setMessages(newMessages);
+              setSelectedChat(finalAiConvo);
+          }
+          return finalAiConvo;
       });
 
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error with AI conversation:", error);
-      let errorText = "Sorry, I encountered an error. Please try again.";
-      if (error && typeof error === 'object' && 'message' in error && typeof error.message === 'string') {
-        errorText = error.message;
-      }
-      const errorMessage: Message = {
-        id: uuidv4(),
-        senderId: AI_USER_ID,
-        text: errorText,
-        timestamp: new Date(),
-        status: 'read',
-      };
-      setAiConversation(prev => {
-        const finalAiConvo = { ...prev, messages: [...prev.messages, errorMessage] };
-        setSelectedChat(finalAiConvo);
-        setMessages(finalAiConvo.messages || []);
-        return finalAiConvo;
-      });
+       const errorMessage: Message = {
+          id: uuidv4(),
+          senderId: AI_USER_ID,
+          text: error.message || "Sorry, I encountered an error. Please try again.",
+          timestamp: new Date(),
+          status: 'read',
+        };
+       setAiConversation(prev => {
+          const newMessages = [...(prev.messages || []), errorMessage];
+          const finalAiConvo = { ...prev, messages: newMessages };
+          if (selectedChat?.id === AI_USER_ID) {
+              setMessages(newMessages);
+              setSelectedChat(finalAiConvo);
+          }
+          return finalAiConvo;
+        });
     } finally {
       setIsAiReplying(false);
     }
-  }, [currentUser, aiConversation]);
+  }, [currentUser, aiConversation, selectedChat?.id]);
   
   const handleCloudinaryUpload = useCallback(async (file: File, messageText: string, chatId: string, senderId: string): Promise<string> => {
     const tempId = uuidv4();
@@ -1339,9 +1316,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           <ImagePreviewDialog
             file={chatData.previewStoryFile}
             mode="story"
-            onSend={async (file, message) => {
-              await chatData.handleCreateStoryFromFile(file, message);
-            }}
+            onSend={chatData.handleCreateStoryFromFile}
             onCancel={() => chatData.setPreviewStoryFile(null)}
           />
         )}
